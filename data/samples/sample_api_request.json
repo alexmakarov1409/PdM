@@ -1,0 +1,11 @@
+{
+  "equipment_id": "M14860",
+  "features": {
+    "type": "M",
+    "air_temp": 298.1,
+    "process_temp": 308.6,
+    "rotational_speed": 1551,
+    "torque": 42.8,
+    "tool_wear": 0
+  }
+}

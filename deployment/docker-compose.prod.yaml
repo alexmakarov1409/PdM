@@ -1,0 +1,137 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      target: production
+    environment:
+      ENVIRONMENT: production
+      DEBUG: false
+      LOG_LEVEL: info
+      WORKERS_PER_CORE: 2
+      MAX_WORKERS: 8
+      SECRET_KEY: ${SECRET_KEY}
+      API_KEYS: ${API_KEYS}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MODEL_DOWNLOAD_URL: ${MODEL_DOWNLOAD_URL}
+      SCALER_DOWNLOAD_URL: ${SCALER_DOWNLOAD_URL}
+    deploy:
+      mode: replicated
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 30s
+        order: start-first
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4'
+        reservations:
+          memory: 2G
+          cpus: '2'
+      placement:
+        constraints:
+          - node.role == worker
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/readiness"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  nginx:
+    deploy:
+      mode: replicated
+      replicas: 2
+      update_config:
+        parallelism: 1
+        delay: 30s
+      restart_policy:
+        condition: on-failure
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+      placement:
+        constraints:
+          - node.role == manager
+
+  postgres:
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.db == true
+      resources:
+        limits:
+          memory: 8G
+          cpus: '4'
+        reservations:
+          memory: 4G
+          cpus: '2'
+
+  redis:
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.cache == true
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  kafka:
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.kafka == true
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
+        reservations:
+          memory: 1G
+          cpus: '1'
+
+  prometheus:
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.monitoring == true
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
+        reservations:
+          memory: 1G
+          cpus: '1'
+
+  grafana:
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.monitoring == true
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+        reservations:
+          memory: 512M
+          cpus: '0.5'

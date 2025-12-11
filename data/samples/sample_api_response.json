@@ -1,0 +1,13 @@
+{
+  "equipment_id": "M14860",
+  "failure_probability": 0.87,
+  "prediction": true,
+  "threshold": 0.35,
+  "shap_explanation": {
+    "tool_wear": 0.35,
+    "torque": 0.22,
+    "temp_diff": 0.15
+  },
+  "inference_time": 0.0042,
+  "timestamp": "2024-10-15T12:00:00Z"
+}

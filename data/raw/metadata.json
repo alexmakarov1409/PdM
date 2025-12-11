@@ -1,0 +1,19 @@
+{
+  "dataset_name": "Predictive Maintenance Dataset",
+  "source": "Kaggle",
+  "source_url": "https://www.kaggle.com/datasets/shivamb/machine-predictive-maintenance-classification",
+  "download_date": "2024-10-15",
+  "total_records": 10000,
+  "features": {
+    "UDI": "Уникальный идентификатор записи",
+    "Product ID": "Идентификатор продукта с префиксом качества (L/M/H)",
+    "Type": "Тип оборудования (L, M, H)",
+    "Air temperature [K]": "Температура воздуха в Кельвинах",
+    "Process temperature [K]": "Температура процесса в Кельвинах",
+    "Rotational speed [rpm]": "Скорость вращения в об/мин",
+    "Torque [Nm]": "Крутящий момент в Ньютон-метрах",
+    "Tool wear [min]": "Износ инструмента в минутах",
+    "Target": "Целевая переменная (0 - нет отказа, 1 - есть отказ)",
+    "Failure Type": "Тип отказа (6 категорий)"
+  }
+}

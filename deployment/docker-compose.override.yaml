@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      target: app-builder
+    environment:
+      ENVIRONMENT: development
+      DEBUG: true
+      RELOAD: true
+      LOG_LEVEL: debug
+    volumes:
+      - ../../api:/app/api
+      - ../../requirements:/app/requirements
+      - ../../tests:/app/tests
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # Для debugger
+    command: >
+      uvicorn api.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app/api
+      --log-level debug
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4'
+        reservations:
+          memory: 2G
+          cpus: '2'
+
+  postgres:
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_PASSWORD: developer123
+      POSTGRES_DB: predictive_maintenance_dev
+    ports:
+      - "5432:5432"
+
+  redis:
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+
+  kafka-ui:
+    ports:
+      - "8080:8080"
+
+  prometheus:
+    ports:
+      - "9090:9090"
+
+  grafana:
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    ports:
+      - "3000:3000"
+
+  # pgAdmin для управления базой данных
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: predictive-maintenance-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@company.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - predictive-maintenance
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  # Adminer для управления базой данных (альтернатива pgAdmin)
+  adminer:
+    image: adminer:latest
+    container_name: predictive-maintenance-adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    networks:
+      - predictive-maintenance
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+
+  # Portainer для управления контейнерами
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: predictive-maintenance-portainer
+    restart: unless-stopped
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "9000:9000"
+    networks:
+      - predictive-maintenance
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+volumes:
+  pgadmin_data:
+  portainer_data:
